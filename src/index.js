@@ -41,13 +41,14 @@ app.get('/talker', async (req, res) => {
 });
 
 app.get('/talker/:id', async (req, res) => {
-  const talkerId = parseInt(req.params.id); // Obtém o ID da rota como um número inteiro
+  // const talkerId = +req.params.id; // Obtém o ID da rota como um número inteiro
+  const talkerId = Number(req.params.id); // Obtém o ID da rota como um número inteiro
 
   console.log(`BUSCANDO PALESTRANTE COM ID: ${talkerId}`);
   
   const talkerManager = await getAllTalkerManager();
   
-  const talker = talkerManager.find((talker) => talker.id === talkerId);
+  const talker = talkerManager.find((e) => e.id === talkerId);
   
   if (talker) {
     return res.status(200).json(talker);
@@ -55,6 +56,26 @@ app.get('/talker/:id', async (req, res) => {
   return res.status(404).json({
     message: 'Pessoa palestrante não encontrada',
   });
+});
+
+const generateRandomToken = () => {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let token = '';
+  for (let i = 0; i < 16; i += 1) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    token += characters[randomIndex];
+  }
+  return token;
+};
+
+app.post('/login', (req, res) => {
+  const { email, password } = req.body;
+
+  // Verificar se o email e senha são válidos (não implementado neste exemplo)
+  // Se as credenciais são válidas, gerar um token aleatório
+  const token = generateRandomToken();
+  console.log(token);
+  res.status(200).json({ token });
 });
 
 // app.get('/tasks/:taskId', (req, res) => {
