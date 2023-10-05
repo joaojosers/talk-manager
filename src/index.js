@@ -14,3 +14,5 @@ app.get('/', (_request, response) => {
 app.listen(PORT, () => {
   console.log('Online');
 });
+
+// app.use('/user', userRouter); apenas para commit inicial
