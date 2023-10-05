@@ -40,6 +40,28 @@ app.get('/talker', async (req, res) => {
   return res.status(404).json([]);
 });
 
+app.get('/talker/:id', async (req, res) => {
+  const talkerId = parseInt(req.params.id); // Obtém o ID da rota como um número inteiro
+
+  console.log(`BUSCANDO PALESTRANTE COM ID: ${talkerId}`);
+  
+  const talkerManager = await getAllTalkerManager();
+  
+  const talker = talkerManager.find((talker) => talker.id === talkerId);
+  
+  if (talker) {
+    return res.status(200).json(talker);
+  } 
+  return res.status(404).json({
+    message: 'Pessoa palestrante não encontrada',
+  });
+});
+
+// app.get('/tasks/:taskId', (req, res) => {
+//   console.log('LISTANDO UMA UNICA TAREFA');
+//   const { taskId } = req.params;
+//   console.log(`BUSCANDO A TAREFA ${taskId}`);
+
 // app.use('/user', userRouter); apenas para commit inicial
 // const getChocolateById = async (id) => {
 //   const cacauTrybe = await readCacauTrybeFile();
