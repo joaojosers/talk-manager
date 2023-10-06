@@ -27,21 +27,4 @@ const generateRandomToken = () => {
 
 const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-// /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/
-function validateLoginRequest(req) {
-  const { email, password } = req.body;
-  const errors = {
-    'O campo "email" é obrigatório': !email || email.trim() === '',
-    'O "email" deve ter o formato "email@email.com"': !validateEmail(email),
-    'O campo "password" é obrigatório': !password || password.trim() === '',
-    'O "password" deve ter pelo menos 6 caracteres': password.length < 6,
-  };
-  
-  const errorMessages = Object.entries(errors)
-    .filter(([_, condition]) => condition)
-    .map(([_, message]) => message);
-  
-  return errorMessages.length > 0 ? { status: 400, message: errorMessages[0] } : null;
-}
-  
-module.exports = { getAllTalkerManager, generateRandomToken, validateEmail, validateLoginRequest };
+module.exports = { getAllTalkerManager, generateRandomToken, validateEmail };

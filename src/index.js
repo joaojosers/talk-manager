@@ -40,7 +40,7 @@ app.get('/talker/:id', async (req, res) => {
 
 // const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-app.post('/login', (req, res) => {
+function validateLoginRequest(req, res, next) {
   const { email, password } = req.body;
   const errors = {
     'O campo "email" é obrigatório': !email || email.trim() === '',
@@ -50,13 +50,17 @@ app.post('/login', (req, res) => {
   };
 
   const errorMessages = Object.entries(errors)
-    .filter(([condition]) => condition)
-    .map(([message]) => message);
+    .filter(([_, condition]) => condition)
+    .map(([_, message]) => message);
 
   if (errorMessages.length > 0) {
     return res.status(400).json({ message: errorMessages[0] });
   }
 
+  next();
+}
+
+app.post('/login', validateLoginRequest, (req, res) => {
   const token = generateRandomToken();
   res.status(200).json({ token });
 });
