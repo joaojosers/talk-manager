@@ -25,6 +25,12 @@ const generateRandomToken = () => {
   return token;
 };
 
-const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+function validateEmail(email) {
+  // Expressão regular para validar o formato do email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+// const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
 module.exports = { getAllTalkerManager, generateRandomToken, validateEmail };

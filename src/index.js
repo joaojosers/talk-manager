@@ -42,22 +42,20 @@ app.get('/talker/:id', async (req, res) => {
 
 function validateLoginRequest(req, res, next) {
   const { email, password } = req.body;
-  const errors = {
-    'O campo "email" é obrigatório': !email || email.trim() === '',
-    'O "email" deve ter o formato "email@email.com"': !validateEmail(email),
-    'O campo "password" é obrigatório': !password || password.trim() === '',
-    'O "password" deve ter pelo menos 6 caracteres': password.length < 6,
-  };
-
-  const errorMessages = Object.entries(errors)
-    .filter(([_, condition]) => condition)
-    .map(([_, message]) => message);
-
-  if (errorMessages.length > 0) {
-    return res.status(400).json({ message: errorMessages[0] });
+  if (!email) {
+    return res.status(400).json({ message: 'O campo "email" é obrigatório' });
+  }
+  if (!password) {
+    return res.status(400).json({ message: 'O campo "password" é obrigatório' });
+  }
+  if (password.length < 6) {
+    return res.status(400).json({ message: 'O "password" deve ter pelo menos 6 caracteres' });
+  }
+  if (!validateEmail(email)) {
+    return res.status(400).json({ message: 'O "email" deve ter o formato "email@email.com"' });
   }
 
-  next();
+  next(); 
 }
 
 app.post('/login', validateLoginRequest, (req, res) => {
