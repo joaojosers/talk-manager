@@ -10,7 +10,15 @@ const readTalkerManager = async () => {
     return null;
   }
 };
-  
+const writeTalkerManager = async (talkerManager) => {
+  const path = 'src/talker.json';
+  try {
+    const contentFile = JSON.stringify(talkerManager, null, 2);
+    await fs.writeFile(path, contentFile);
+  } catch (error) {
+    return null;
+  }
+};
 const getAllTalkerManager = async () => {
   const talkerManager = await readTalkerManager();
   return talkerManager;
@@ -46,4 +54,6 @@ module.exports = {
   generateRandomToken,
   validateEmail,
   validateDate,
+  readTalkerManager,
+  writeTalkerManager,
 };

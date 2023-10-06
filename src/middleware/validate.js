@@ -14,8 +14,9 @@ const validateTalkerAge = (req, resp, next) => {
   if (!age) {
     return resp.status(400).json({ message: 'O campo "age" é obrigatório' });
   }
-  if (age < 18) {
-    return resp.status(400).json({ message: 'A pessoa palestrante deve ser maior de idade' });
+ 
+  if (!Number.isInteger(age) || age < 18) {
+    return resp.status(400).json({ message: 'O campo "age" deve ser um número inteiro igual ou maior que 18' });
   }
   next();
 };
@@ -30,11 +31,12 @@ const validateTalkerTalk = (req, resp, next) => {
 
 const validateTalkerRate = (req, resp, next) => {
   const { talk: { rate } } = req.body;
-  if (!rate) {
+  if (rate === undefined) {
     return resp.status(400).json({ message: 'O campo "rate" é obrigatório' });
   }
-  if (rate < 1 || rate > 5) {
-    return resp.status(400).json({ message: 'O campo "rate" deve ser um inteiro de 1 à 5' });
+  if (rate < 1 || rate > 5 || !Number.isInteger(rate)) {
+    return resp.status(400)
+      .json({ message: 'O campo "rate" deve ser um número inteiro entre 1 e 5' });
   }
   next();
 };

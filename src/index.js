@@ -1,7 +1,9 @@
 const express = require('express');
-const { getAllTalkerManager, generateRandomToken, validateEmail, 
+const { getAllTalkerManager,
   validateTalkerName, validateTalkerAge, validateTalkerTalk, validateTalkerRate, 
   validateTalkerWatchedAt, authenticateToken } = require('./middleware/validate');
+const { validateEmail, generateRandomToken, 
+  readTalkerManager, writeTalkerManager } = require('./funcoes');
 
 const app = express();
 app.use(express.json());
@@ -72,14 +74,10 @@ app.post('/talker',
   validateTalkerTalk, 
   validateTalkerRate, 
   validateTalkerWatchedAt, 
-  (req, res) => {
+  async (req, res) => {
     const { name, age, talk } = req.body;
-    const newTalker = {
-      id: // Gere um ID único para a nova pessoa palestrante,
-    name,
-      age,
-      talk,
-    };
-
-    res.status(201).json(newTalker);
+    const talkers = await readTalkerManager();
+    talkers.push({ id: talkers.length + 1, name, age, talk });
+    await writeTalkerManager(talkers);
+    res.status(201).json(talkers[talkers.length - 1]);
   });
