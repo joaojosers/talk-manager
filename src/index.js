@@ -1,5 +1,7 @@
 const express = require('express');
-const { getAllTalkerManager, generateRandomToken, validateEmail } = require('./funcoes');
+const { getAllTalkerManager, generateRandomToken, validateEmail, 
+  validateTalkerName, validateTalkerAge, validateTalkerTalk, validateTalkerRate, 
+  validateTalkerWatchedAt, authenticateToken } = require('./middleware/validate');
 
 const app = express();
 app.use(express.json());
@@ -62,3 +64,22 @@ app.post('/login', validateLoginRequest, (req, res) => {
   const token = generateRandomToken();
   res.status(200).json({ token });
 });
+
+app.post('/talker', 
+  authenticateToken, 
+  validateTalkerName,
+  validateTalkerAge,   
+  validateTalkerTalk, 
+  validateTalkerRate, 
+  validateTalkerWatchedAt, 
+  (req, res) => {
+    const { name, age, talk } = req.body;
+    const newTalker = {
+      id: // Gere um ID único para a nova pessoa palestrante,
+    name,
+      age,
+      talk,
+    };
+
+    res.status(201).json(newTalker);
+  });

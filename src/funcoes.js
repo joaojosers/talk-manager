@@ -31,6 +31,19 @@ function validateEmail(email) {
   return emailRegex.test(email);
 }
 
+function validateDate(dateString) {
+  const dateRegex = /^\d{2}\/\d{2}\/\d{4}$/;
+  return dateRegex.test(dateString);
+}
+  
+// function validateRate(rate) {
+//   return typeof rate === 'number' && rate >= 1 && rate <= 5;
+// }
 // const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-module.exports = { getAllTalkerManager, generateRandomToken, validateEmail };
+module.exports = {
+  getAllTalkerManager,
+  generateRandomToken,
+  validateEmail,
+  validateDate,
+};
