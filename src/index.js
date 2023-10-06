@@ -5,6 +5,7 @@ const express = require('express');
 const app = express();
 app.use(express.json());
 
+const router = express.Router();
 const HTTP_OK_STATUS = 200;
 const PORT = process.env.PORT || '3001';
 
@@ -71,68 +72,45 @@ const generateRandomToken = () => {
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
 
-  // Verificar se o email e senha são válidos (não implementado neste exemplo)
-  // Se as credenciais são válidas, gerar um token aleatório
   const token = generateRandomToken();
-  console.log(token);
+  console.log(email);
+  console.log(password);
   res.status(200).json({ token });
 });
 
-// app.get('/tasks/:taskId', (req, res) => {
-//   console.log('LISTANDO UMA UNICA TAREFA');
-//   const { taskId } = req.params;
-//   console.log(`BUSCANDO A TAREFA ${taskId}`);
+const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-// app.use('/user', userRouter); apenas para commit inicial
-// const getChocolateById = async (id) => {
-//   const cacauTrybe = await readCacauTrybeFile();
-//   return cacauTrybe.chocolates
-//     .filter((chocolate) => chocolate.id === id);
-// };
+const validateLoginRequest = (req, res, next) => {
+  const { email, password } = req.body;
+  const errors = {
+    'O campo "email" é obrigatório': !email || email.trim() === '',
+    'O "email" deve ter o formato "email@email.com"': !validateEmail(email),
+    'O campo "password" é obrigatório': !password || password.trim() === '',
+    'O "password" deve ter pelo menos 6 caracteres': password.length < 6,
+  };
 
-// const getChocolatesByBrand = async (brandId) => {
-//   const cacauTrybe = await readCacauTrybeFile();
-//   return cacauTrybe.chocolates
-//     .filter((chocolate) => chocolate.brandId === brandId);
-// };
+  const errorMessages = Object.entries(errors)
+    .filter(([_, condition]) => condition)
+    .map(([_, message]) => message);
 
-// const writeCacauTrybeFile = async (content) => {
-//   const path = '/files/cacauTrybeFile.json';
-//   try {
-//     await fs.writeFile(join(__dirname, path), JSON.stringify(content));
-//   } catch (error) {
-//     return null;
-//   }
-// };
+  if (errorMessages.length > 0) {
+    return res.status(400).json({ message: errorMessages[0] });
+  }
 
-// const createChocolate = async (name, brandId) => {
-//   const cacauTrybe = await readCacauTrybeFile(); // é uma chama externa
-//   const newChocolate = { id: cacauTrybe.nextChocolateId, name, brandId };
+  next();
+};
 
-//   cacauTrybe.chocolates.push(newChocolate);
-//   cacauTrybe.nextChocolateId += 1
-//   await writeCacauTrybeFile(cacauTrybe);
+router.post('/login', validateLoginRequest, (req, res) => {
+  const token = generateRandomToken();
+  res.status(200).json({ token });
+});
 
-//   return newChocolate;
-// };
+app.use(express.json());
+app.use('/api', router);
 
-// const deleteChocolate = async (id) => {
-//   const cacauTrybe = await readCacauTrybeFile();
-//   const chocolateExists = cacauTrybe.chocolates.some(
-//     (chocolate) => chocolate.id === id,
-//   );
-
-//   if (chocolateExists) {
-//     cacauTrybe.chocolates = cacauTrybe.chocolates.filter(
-//       (chocolate) => chocolate.id !== id,
-//     );
-
-//     await writeCacauTrybeFile(cacauTrybe);
-//     return true;
-//   }
-
-//   return false;
-// };
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
 
 module.exports = {
   getAllTalkerManager,
