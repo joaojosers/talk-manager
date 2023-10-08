@@ -1,7 +1,7 @@
 const express = require('express');
 const { getAllTalkerManager,
   validateTalkerName, validateTalkerAge, validateTalkerTalk, validateTalkerRate, 
-  validateTalkerWatchedAt, authenticateToken } = require('./middleware/validate');
+  validateTalkerWatchedAt, authenticateToken, validateTalkerId } = require('./middleware/validate');
 const { validateEmail, generateRandomToken, 
   readTalkerManager, writeTalkerManager } = require('./funcoes');
 
@@ -80,4 +80,26 @@ app.post('/talker',
     talkers.push({ id: talkers.length + 1, name, age, talk });
     await writeTalkerManager(talkers);
     res.status(201).json(talkers[talkers.length - 1]);
+  });
+
+app.put('/talker/:id', authenticateToken, validateTalkerId, validateTalkerName, validateTalkerAge, 
+  validateTalkerTalk, validateTalkerRate, validateTalkerWatchedAt, async (req, res) => {
+    const { id } = req.params;
+    const { name, age, talk } = req.body;
+    const talkers = await readTalkerManager();
+    const talkerIndex = talkers.findIndex((t) => t.id === parseInt(id, 10));
+
+    if (talkerIndex === -1) {
+      return res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
+    }
+    const updatedTalker = {
+      id: parseInt(id, 10),
+      name,
+      age,
+      talk,
+    };
+    talkers[talkerIndex] = updatedTalker;
+    await writeTalkerManager(talkers);
+
+    res.status(200).json(updatedTalker);
   });
