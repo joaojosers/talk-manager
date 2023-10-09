@@ -105,3 +105,26 @@ app.put('/talker/:id', authenticateToken, validateTalkerName, validateTalkerAge,
 
     res.status(200).json(updatedTalker);
   });
+
+app.delete('/talker/:id', authenticateToken, async (req, res) => {
+  const { id } = req.params;
+  const talkers = await readTalkerManager();
+  const talkerIndex = talkers.findIndex((t) => t.id === parseInt(id, 10));
+
+  if (talkerIndex === -1) {
+    return res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
+  }
+
+  // Remove o palestrante do array
+  talkers.splice(talkerIndex, 1);
+  
+  // Escreve o arquivo atualizado no disco
+  await writeTalkerManager(talkers);
+
+  // Retorna resposta com status 204 (sem conteúdo)
+  res.status(204).send();
+});
+
+// Outras rotas e configurações...
+
+// Exportações e outras configurações...
