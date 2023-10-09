@@ -69,13 +69,13 @@ function authenticateToken(req, res, next) {
   next();
 }
 
-const validateTalkerId = (req, res, next) => {
-  const { id } = req.params;
-  if (!/^\d+$/.test(id)) {
-    return res.status(400).json({ message: 'Formato inválido para o ID da pessoa palestrante' });
-  }
-  next();
-};
+// const validateTalkerId = (req, res, next) => {
+//   const { id } = req.params;
+//   if (!/^\d+$/.test(id)) {
+//     return res.status(400).json({ message: 'Formato inválido para o ID da pessoa palestrante' });
+//   }
+//   next();
+// };
 
 module.exports = {
   validateTalkerName,
@@ -84,5 +84,5 @@ module.exports = {
   validateTalkerRate,
   validateTalkerWatchedAt,
   authenticateToken,
-  validateTalkerId,
+  // validateTalkerId,
 };

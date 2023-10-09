@@ -1,9 +1,11 @@
 const express = require('express');
-const { getAllTalkerManager,
+const { 
   validateTalkerName, validateTalkerAge, validateTalkerTalk, validateTalkerRate, 
-  validateTalkerWatchedAt, authenticateToken, validateTalkerId } = require('./middleware/validate');
+  validateTalkerWatchedAt, authenticateToken } = require('./middleware/validate'); 
+  // #validateTalkerId
+
 const { validateEmail, generateRandomToken, 
-  readTalkerManager, writeTalkerManager } = require('./funcoes');
+  readTalkerManager, writeTalkerManager, getAllTalkerManager } = require('./funcoes');
 
 const app = express();
 app.use(express.json());
@@ -81,8 +83,8 @@ app.post('/talker',
     await writeTalkerManager(talkers);
     res.status(201).json(talkers[talkers.length - 1]);
   });
-
-app.put('/talker/:id', authenticateToken, validateTalkerId, validateTalkerName, validateTalkerAge, 
+// validateTalkerId
+app.put('/talker/:id', authenticateToken, validateTalkerName, validateTalkerAge, 
   validateTalkerTalk, validateTalkerRate, validateTalkerWatchedAt, async (req, res) => {
     const { id } = req.params;
     const { name, age, talk } = req.body;
