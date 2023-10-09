@@ -22,6 +22,20 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
+app.get('/talker/search', authenticateToken, async (req, res) => {
+  const { q } = req.query;
+
+  const talkers = await readTalkerManager();
+  let filteredTalkers = talkers;
+
+  if (q) {
+    filteredTalkers = talkers.filter((talker) =>
+      talker.name.toLowerCase().includes(q.toLowerCase()));
+  }
+
+  res.status(200).json(filteredTalkers);
+});
+
 app.get('/talker', async (req, res) => {
   console.log('LISTANDO TODOS OS PALESTRANTES.');
   const talkerManager = await getAllTalkerManager();
@@ -68,6 +82,8 @@ app.post('/login', validateLoginRequest, (req, res) => {
   const token = generateRandomToken();
   res.status(200).json({ token });
 });
+
+// Importações e outras configurações...
 
 app.post('/talker', 
   authenticateToken, 
