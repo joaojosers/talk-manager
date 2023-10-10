@@ -23,8 +23,8 @@ app.listen(PORT, () => {
 });
 
 app.get('/talker/search', authenticateToken, async (req, res) => {
-  const { q } = req.query;
-
+  const { q, rate } = req.query;
+  // const { q } = req.query;
   const talkers = await readTalkerManager();
   let filteredTalkers = talkers;
 
@@ -34,6 +34,9 @@ app.get('/talker/search', authenticateToken, async (req, res) => {
   }
 
   res.status(200).json(filteredTalkers);
+  if (rate) {
+    filteredTalkers = talkers.filter((talker) => talker.rate === rate);
+  }
 });
 
 app.get('/talker', async (req, res) => {
@@ -140,7 +143,3 @@ app.delete('/talker/:id', authenticateToken, async (req, res) => {
   // Retorna resposta com status 204 (sem conteúdo)
   res.status(204).send();
 });
-
-// Outras rotas e configurações...
-
-// Exportações e outras configurações...
