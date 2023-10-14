@@ -50,10 +50,19 @@ const filterTalkersRate = (rate, talkers) => talkers.filter((talker) =>
 const filterTalkersSearch = (q, talkers) => talkers.filter((talker) =>
   talker.name.toLowerCase().includes(q.toLowerCase()));
 
+const filterTalkersDate = (date, talkers) => talkers.filter((talker) =>
+  talker.talk.watchedAt === date);
+
+function queryParamUndefined(q, rate, date) {
+  if (q === undefined && rate === undefined && date === undefined) {
+    return true;
+  }
+}
+  
 function filterTalkers(query, talkers) {
-  const { q, rate } = query;
+  const { q, rate, date } = query;
   let filter = talkers;
-  if (q === undefined && rate === undefined) {
+  if (queryParamUndefined(q, rate, date)) {
     return [];
   }
   if (q) {
@@ -65,13 +74,37 @@ function filterTalkers(query, talkers) {
   return filter;
 }
 
+function filterTalkersQueryDate(query, talkers) {
+  const { date } = query;
+  let filter = filterTalkers(query, talkers);
+  if (date) {
+    filter = filterTalkersDate(date, filter);
+  }
+  return filter;
+}
+
 function validateRateNumber(rate) {
   const n = Number(rate);
   if (Number.isNaN(n) || n < 1 || n > 5 || !Number.isInteger(n)) {
     return { status: 400, message: 'O campo "rate" deve ser um número inteiro entre 1 e 5' };
   }
 }
+function validateDateQuery(date) {
+  if (!validateDate(date)) {
+    return { status: 400, message: 'O parâmetro "date" deve ter o formato "dd/mm/aaaa"' };
+  }
+}
 
+function validateQueryParams(req) {
+  const w = req.query.rate && validateRateNumber(req.query.rate);
+  if (w) {
+    return w;
+  }
+  const d = req.query.date && validateDateQuery(req.query.date);
+  if (d) {
+    return d;
+  }
+}
 module.exports = {
   getAllTalkerManager,
   generateRandomToken,
@@ -83,4 +116,7 @@ module.exports = {
   filterTalkersSearch,
   filterTalkers,
   validateRateNumber,
+  validateDateQuery,
+  validateQueryParams,
+  filterTalkersQueryDate,
 };

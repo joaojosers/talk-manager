@@ -6,7 +6,7 @@ const {
   // #validateTalkerId
 
 const { validateEmail, generateRandomToken, readTalkerManager, writeTalkerManager, 
-  getAllTalkerManager, filterTalkers, validateRateNumber } = require('./funcoes');
+  getAllTalkerManager, filterTalkersQueryDate, validateQueryParams } = require('./funcoes');
 
 const app = express();
 app.use(express.json());
@@ -25,12 +25,12 @@ app.listen(PORT, () => {
 
 app.get('/talker/search', authenticateToken, async (req, res) => {
   const talkers = await readTalkerManager();
-  const filteredTalkers = filterTalkers(req.query, talkers);
+  const filteredTalkers = filterTalkersQueryDate(req.query, talkers);
   if (req.query.q && filteredTalkers.length === 0) {
     return res.status(404)
       .json({ message: 'Nenhum palestrante encontrado com os critérios de pesquisa fornecidos' });
   }
-  const w = req.query.rate && validateRateNumber(req.query.rate);
+  const w = validateQueryParams(req);
   if (w) {
     return res.status(w.status).json({ message: w.message });
   }
