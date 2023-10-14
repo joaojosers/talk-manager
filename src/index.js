@@ -1,3 +1,4 @@
+const mysql = require('mysql2/promise');
 const express = require('express');
 const { 
   validateTalkerName, validateTalkerAge, validateTalkerTalk, validateTalkerRate, 
@@ -6,7 +7,8 @@ const {
   // #validateTalkerId
 
 const { validateEmail, generateRandomToken, readTalkerManager, writeTalkerManager, 
-  getAllTalkerManager, filterTalkersQueryDate, validateQueryParams } = require('./funcoes');
+  getAllTalkerManager, filterTalkersQueryDate, validateQueryParams,
+  validateRateNumber } = require('./funcoes');
 
 const app = express();
 app.use(express.json());
@@ -42,6 +44,36 @@ app.get('/talker', async (req, res) => {
   const talkerManager = await getAllTalkerManager();
   if (talkerManager) return res.status(200).json(talkerManager);
   return res.status(404).json([]);
+});
+
+const pool = mysql.createPool({
+  host: process.env.MYSQL_HOSTNAME || 'localhost',
+  port: process.env.MYSQL_PORT || '3306',
+  user: process.env.MYSQL_USER || 'root',
+  password: process.env.MYSQL_PASSWORD || 'password',
+  database: process.env.MYSQL_DATABASE || 'TalkerDB',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+});
+
+app.get('/talker/db', async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT * FROM talkers');
+    const talkers = rows.map((talker) => ({
+      id: talker.id,
+      name: talker.name,
+      age: talker.age,
+      talk: {
+        watchedAt: talker.talk_watched_at,
+        rate: talker.talk_rate,
+      },
+    }));
+    res.status(200).json(talkers);
+  } catch (error) {
+    console.error('Error fetching data from DB:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
 });
 
 app.get('/talker/:id', async (req, res) => {
@@ -142,10 +174,23 @@ app.delete('/talker/:id', authenticateToken, async (req, res) => {
   res.status(204).send();
 });
 
-// if (rate && (isNaN(rate) || rate < 1 || rate > 5 || !Number.isInteger(+rate))) {
-//   return res.status(400).json({ message: 'O campo "rate" deve ser um número inteiro entre 1 e 5' });
-// }
-// if (rate < 1 || rate > 5 || !Number.isInteger(rate)) {
-//   return resp.status(400)
-//     .json({ message: 'O campo "rate" deve ser um número inteiro entre 1 e 5' });
-// }
+app.patch('/talker/rate/:id', authenticateToken, async (req, res) => {
+  const { id } = req.params;
+  const { rate } = req.body;
+  if (rate === undefined) {
+    return res.status(400).json({ message: 'O campo "rate" é obrigatório' });
+  }
+  const error = validateRateNumber(rate);
+  if (error) {
+    return res.status(error.status).json({ message: error.message });
+  }
+  const talkers = await readTalkerManager();
+  const talkerIndex = talkers.findIndex((t) => t.id === parseInt(id, 10));
+  
+  if (talkerIndex === -1) {
+    return res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
+  }
+  talkers[talkerIndex].talk.rate = Number(rate);
+  await writeTalkerManager(talkers);
+  return res.status(204).json();
+});
