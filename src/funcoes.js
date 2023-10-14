@@ -44,6 +44,34 @@ function validateDate(dateString) {
   return dateRegex.test(dateString);
 }
 
+const filterTalkersRate = (rate, talkers) => talkers.filter((talker) =>
+  talker.talk.rate === +rate);
+
+const filterTalkersSearch = (q, talkers) => talkers.filter((talker) =>
+  talker.name.toLowerCase().includes(q.toLowerCase()));
+
+function filterTalkers(query, talkers) {
+  const { q, rate } = query;
+  let filter = talkers;
+  if (q === undefined && rate === undefined) {
+    return [];
+  }
+  if (q) {
+    filter = filterTalkersSearch(q, filter);
+  }
+  if (rate) {
+    filter = filterTalkersRate(rate, filter);
+  }
+  return filter;
+}
+
+function validateRateNumber(rate) {
+  const n = Number(rate);
+  if (Number.isNaN(n) || n < 1 || n > 5 || !Number.isInteger(n)) {
+    return { status: 400, message: 'O campo "rate" deve ser um número inteiro entre 1 e 5' };
+  }
+}
+
 module.exports = {
   getAllTalkerManager,
   generateRandomToken,
@@ -51,4 +79,8 @@ module.exports = {
   validateDate,
   readTalkerManager,
   writeTalkerManager,
+  filterTalkersRate,
+  filterTalkersSearch,
+  filterTalkers,
+  validateRateNumber,
 };

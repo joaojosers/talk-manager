@@ -68,6 +68,23 @@ function authenticateToken(req, res, next) {
   
   next();
 }
+const validateDate = (date) => {
+  const dateRegex = /^\d{2}\/\d{2}\/\d{4}$/;
+  return dateRegex.test(date);
+};
+
+// const validateDateQuery = (req, res, next) => {
+//   const { date } = req.query;
+//   if (!validateDate(date)) {
+//     return res.status(400).json({ message: 'O parâmetro "date" deve ter o formato "dd/mm/aaaa"' });
+//   }
+//   next();
+// };
+
+// if (date) {
+//   if (!/^\d{2}\/\d{2}\/\d{4}$/.test(date)) {
+//     return res.status(400).json({ message: 'O parâmetro "date" deve ter o formato "dd/mm/aaaa"' });
+//   }
 
 // const validateTalkerId = (req, res, next) => {
 //   const { id } = req.params;
@@ -84,5 +101,5 @@ module.exports = {
   validateTalkerRate,
   validateTalkerWatchedAt,
   authenticateToken,
-  // validateTalkerId,
+  validateDate,
 };

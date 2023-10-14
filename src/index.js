@@ -1,11 +1,12 @@
 const express = require('express');
 const { 
   validateTalkerName, validateTalkerAge, validateTalkerTalk, validateTalkerRate, 
-  validateTalkerWatchedAt, authenticateToken } = require('./middleware/validate'); 
+  validateTalkerWatchedAt,
+  authenticateToken } = require('./middleware/validate'); 
   // #validateTalkerId
 
-const { validateEmail, generateRandomToken, 
-  readTalkerManager, writeTalkerManager, getAllTalkerManager } = require('./funcoes');
+const { validateEmail, generateRandomToken, readTalkerManager, writeTalkerManager, 
+  getAllTalkerManager, filterTalkers, validateRateNumber } = require('./funcoes');
 
 const app = express();
 app.use(express.json());
@@ -23,20 +24,17 @@ app.listen(PORT, () => {
 });
 
 app.get('/talker/search', authenticateToken, async (req, res) => {
-  const { q, rate } = req.query;
-  // const { q } = req.query;
   const talkers = await readTalkerManager();
-  let filteredTalkers = talkers;
-
-  if (q) {
-    filteredTalkers = talkers.filter((talker) =>
-      talker.name.toLowerCase().includes(q.toLowerCase()));
+  const filteredTalkers = filterTalkers(req.query, talkers);
+  if (req.query.q && filteredTalkers.length === 0) {
+    return res.status(404)
+      .json({ message: 'Nenhum palestrante encontrado com os critérios de pesquisa fornecidos' });
   }
-
-  res.status(200).json(filteredTalkers);
-  if (rate) {
-    filteredTalkers = talkers.filter((talker) => talker.rate === rate);
+  const w = req.query.rate && validateRateNumber(req.query.rate);
+  if (w) {
+    return res.status(w.status).json({ message: w.message });
   }
+  return res.status(200).json(filteredTalkers);
 });
 
 app.get('/talker', async (req, res) => {
@@ -77,7 +75,7 @@ function validateLoginRequest(req, res, next) {
   if (!validateEmail(email)) {
     return res.status(400).json({ message: 'O "email" deve ter o formato "email@email.com"' });
   }
-
+  
   next(); 
 }
 
@@ -109,7 +107,7 @@ app.put('/talker/:id', authenticateToken, validateTalkerName, validateTalkerAge,
     const { name, age, talk } = req.body;
     const talkers = await readTalkerManager();
     const talkerIndex = talkers.findIndex((t) => t.id === parseInt(id, 10));
-
+  
     if (talkerIndex === -1) {
       return res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
     }
@@ -121,7 +119,7 @@ app.put('/talker/:id', authenticateToken, validateTalkerName, validateTalkerAge,
     };
     talkers[talkerIndex] = updatedTalker;
     await writeTalkerManager(talkers);
-
+  
     res.status(200).json(updatedTalker);
   });
 
@@ -129,17 +127,25 @@ app.delete('/talker/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   const talkers = await readTalkerManager();
   const talkerIndex = talkers.findIndex((t) => t.id === parseInt(id, 10));
-
+  
   if (talkerIndex === -1) {
     return res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
   }
-
+  
   // Remove o palestrante do array
   talkers.splice(talkerIndex, 1);
   
   // Escreve o arquivo atualizado no disco
   await writeTalkerManager(talkers);
-
+  
   // Retorna resposta com status 204 (sem conteúdo)
   res.status(204).send();
 });
+
+// if (rate && (isNaN(rate) || rate < 1 || rate > 5 || !Number.isInteger(+rate))) {
+//   return res.status(400).json({ message: 'O campo "rate" deve ser um número inteiro entre 1 e 5' });
+// }
+// if (rate < 1 || rate > 5 || !Number.isInteger(rate)) {
+//   return resp.status(400)
+//     .json({ message: 'O campo "rate" deve ser um número inteiro entre 1 e 5' });
+// }
