@@ -12,10 +12,6 @@
 ```
 docker-compose up -d
 ```
-## em um terminal, inicie os containers
-```
-docker-compose up -d
-```
 ## acesse o terminal do container inicie a aplicação
 docker exec -it talker_manager bash
 npm start
